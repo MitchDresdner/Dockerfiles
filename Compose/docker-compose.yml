@@ -1,0 +1,23 @@
+# docker-compose up
+# docker-compose config           // verify configuration
+version: '3'
+services:
+  mmc:
+    image: mitchd/mmc
+    ports:
+     - "8585:8585"
+    restart: always
+  mule:
+    image: "mitchd/mule"
+    ports:
+     - "7777:7777"
+     - "8081:8081"
+     - "8082:8082"
+     - "8090:8090"
+     - "8091:8091"
+    volumes:
+     - "mule_data: /opt/mule"
+    restart: always
+
+volumes:
+  mule_data:

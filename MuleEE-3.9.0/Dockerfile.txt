@@ -1,0 +1,56 @@
+FROM java:openjdk-8-jdk
+
+# 3.9.0 ee branch
+# docker build -t mitchd/mule39ee .
+# docker run -itd --name mule -P mitchd/mule39ee
+#
+# docker run --rm -it --net=host mitchd/mule39ee ip addr show eth0
+# docker run --rm -it --net=host mitchd/mule39ee bash
+#
+# docker run -itd --name mule -p 8082:8082 -v /opt/mule/apps:/opt/mule/apps -v /opt/mule/logs:/opt/mule/logs mitchd/mule39ee
+# docker run -itd --name mule -p 7777:7777 -p 8081:8081 -p 8085:8085 -p 8090:8090 mitchd/mule39ee
+#
+# docker exec -it mule bash
+# docker run -itd --name muleDbg mitchd/mule39ee bash
+#
+# docker run -itd --name mule -P -v /opt/mule/logs:/opt/mule/logs mitchd/mule39ee
+# docker run -itd --name mule -p 7777:7777 -p 8082:8082 -p 8085:8085 -p 8090:8090 -v /opt/mule/logs:/opt/mule/logs -v /opt/mule/conf:/opt/mule/conf mitchd/mule39ee
+
+
+MAINTAINER Mitch Dresdner <mdresdner@terathink.com>
+
+USER root
+
+WORKDIR /opt
+RUN useradd --user-group --shell /bin/false mule && chown mule /opt 
+
+COPY    ./mule-ee-distribution-standalone-3.9.0.tar.gz /opt
+COPY    ./start.sh /opt
+
+RUN 	tar xzf mule-ee-distribution-standalone-3.9.0.tar.gz \
+		  && ln -s mule-enterprise-standalone-3.9.0 mule \
+		  && chmod 755 mule-enterprise-standalone-3.9.0 \
+		  && chown -R mule:mule mule-enterprise-standalone-3.9.0 start.sh \
+		  && rm mule-ee-distribution-standalone-3.9.0.tar.gz
+
+
+# Mule environment vars
+ENV MULE_HOME /opt/mule
+ENV PATH $MULE_HOME/bin:$PATH
+
+# Volume mount points
+VOLUME ["/opt/mule/logs", "/opt/mule/conf", "/opt/mule/apps", "/opt/mule/domains"]
+
+USER mule
+
+ENTRYPOINT ["mule"]
+CMD ["console"]
+
+# Expose default http ports
+EXPOSE 7777
+EXPOSE 8081
+EXPOSE 8082
+EXPOSE 8084
+EXPOSE 8085
+EXPOSE 8091
+EXPOSE 8090
